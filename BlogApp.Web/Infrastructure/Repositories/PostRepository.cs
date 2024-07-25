@@ -9,5 +9,10 @@ namespace BlogApp.Web.Infrastructure.Repositories
         public PostRepository(AppDbContext dbContext) : base(dbContext)
         {
         }
+
+        public List<Comment> GetComments(int postId)
+        {
+            return _dbContext.Comments.Where(c => c.PostId == postId).ToList();
+        }
     }
 }

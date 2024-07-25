@@ -5,6 +5,6 @@ namespace BlogApp.Web.Infrastructure.Interfaces
 {
     public interface IPostRepository: IBaseRepository<Post>
     {
-
+        List<Comment> GetComments(int postId);
     }
 }
