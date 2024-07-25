@@ -70,13 +70,16 @@ namespace BlogApp.Web.Controllers
         {
             Post? post = await _repository.Post.GetById(id);
             AppUser? user = await _repository.AppUser.GetById(post.AppUserId);
+            List<Comment> comments = _repository.Post.GetComments(id);
+
             ViewPostVM obj = new ViewPostVM
             {
                 Id = post.Id,
                 Title = post.Title,
                 Content = post.Content,
                 AuthorId = user.Id,
-                Author = user
+                Author = user,
+                Comments = comments
             };
 
             return View(obj);
