@@ -15,6 +15,7 @@ namespace BlogApp.Web.Controllers
 
         public IActionResult Index()
         {
+            if (User.Identity.IsAuthenticated) return RedirectToAction("Home", "User");
             return View();
         }
 
