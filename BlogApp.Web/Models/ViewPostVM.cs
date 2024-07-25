@@ -12,6 +12,8 @@ namespace BlogApp.Web.Models
         public string AuthorId { get; set; }
         [ForeignKey("AuthorId")]
         public AppUser Author { get; set; }
+        public string Comment { get; set; }
+        public ICollection<Comment> Comments { get; set; }
 
     }
 }

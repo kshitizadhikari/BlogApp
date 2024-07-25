@@ -8,4 +8,17 @@
   </div>
 </div>
 
+<form asp-controller="User" asp-action="AddComment" method="post">
+    <div class="mb-3">
+        <input type="hidden" name="postId" value="@Model.Id" />
+        <label asp-for="Comment" class="control-label"></label>
+        <input type="text" asp-for="Comment" class="form-control" required />
+        <span asp-validation-for="Comment" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Comment</button>
+</form>
+
 <a asp-controller="User" asp-action="Home">Go Back</a>
+
+<!-- Include validation scripts -->
+<partial name="_ValidationScriptsPartial" />

@@ -51,6 +51,7 @@ namespace BlogApp.Web.Controllers
             }
 
             await _signInManager.SignInAsync(user, true);
+            HttpContext.Session.SetString("user_id", user.Id);
             return RedirectToAction("Home", "User");
         }
 

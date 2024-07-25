@@ -1,9 +1,10 @@
-﻿@model List<ViewPostVM>
-
+﻿
+@model List<ViewPostVM>
 <h1>Home View</h1>
-
+@{
+    var user_id = Context.Session.GetString("user_id");
+}
 <a asp-controller="User" asp-action="CreatePost">Add Post</a>
-
 <table class="table">
     <thead>
         <tr>
@@ -21,12 +22,17 @@
                 <td>@item.Title</td>
                 <td>@item.Author.UserName</td>
                 <td>
-                    <a asp-controller="User" asp-action="ViewPost" asp-route-id="@item.Id">View</a> |
-                    <a asp-controller="User" asp-action="UpdatePost" asp-route-id="@item.Id">Update</a> |
-                    <form asp-controller="User" asp-action="DeletePost" method="post">
+                    <a asp-controller="User" asp-action="ViewPost" asp-route-id="@item.Id">View</a> 
+                    @if( user_id == item.Author.Id)
+                    {
+                        <span>| </span>
+                        <a asp-controller="User" asp-action="UpdatePost" asp-route-id="@item.Id">Update</a>
+                        <form asp-controller="User" asp-action="DeletePost" method="post">
                         <input type="hidden" name="id" value="@item.Id" />
                         <button class="link-dark" type="submit">Delete</button>
                     </form>
+                    }
+                    
 
                 </td>
             </tr>

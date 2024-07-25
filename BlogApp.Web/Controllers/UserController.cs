@@ -22,7 +22,6 @@ namespace BlogApp.Web.Controllers
         public async Task<IActionResult> Home()
         {
             List<Post> posts = await _repository.Post.GetAll().ToListAsync();
-
             List<ViewPostVM> postsVM = new List<ViewPostVM>();
 
             foreach(var item in posts)
@@ -71,7 +70,6 @@ namespace BlogApp.Web.Controllers
         {
             Post? post = await _repository.Post.GetById(id);
             AppUser? user = await _repository.AppUser.GetById(post.AppUserId);
-
             ViewPostVM obj = new ViewPostVM
             {
                 Id = post.Id,
@@ -82,6 +80,22 @@ namespace BlogApp.Web.Controllers
             };
 
             return View(obj);
+        }
+
+        public async Task<IActionResult> AddComment(int postId, string comment)
+        {
+            var userId = _httpContextAccessor.HttpContext.User.GetUserId();
+
+            Comment obj = new Comment
+            {
+                Content = comment,
+                PostId = postId,
+                AppUserId = userId
+            };
+
+            _repository.Comment.Create(obj);
+            await _repository.Save();
+            return RedirectToAction("ViewPost", new { id = postId });
         }
 
         public async Task<IActionResult> UpdatePost(int id)
@@ -115,7 +129,7 @@ namespace BlogApp.Web.Controllers
         {
             Post? post = await _repository.Post.GetById(id);
             _repository.Post.Delete(post);
-            _repository.Save();
+            await _repository.Save();
             return RedirectToAction("Home");
         }
     }
