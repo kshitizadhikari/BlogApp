@@ -109,5 +109,14 @@ namespace BlogApp.Web.Controllers
 
             return RedirectToAction("Home");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> DeletePost(int id)
+        {
+            Post? post = await _repository.Post.GetById(id);
+            _repository.Post.Delete(post);
+            _repository.Save();
+            return RedirectToAction("Home");
+        }
     }
 }

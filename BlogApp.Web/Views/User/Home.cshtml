@@ -22,7 +22,12 @@
                 <td>@item.Author.UserName</td>
                 <td>
                     <a asp-controller="User" asp-action="ViewPost" asp-route-id="@item.Id">View</a> |
-                    <a asp-controller="User" asp-action="UpdatePost" asp-route-id="@item.Id">Update</a>
+                    <a asp-controller="User" asp-action="UpdatePost" asp-route-id="@item.Id">Update</a> |
+                    <form asp-controller="User" asp-action="DeletePost" method="post">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button class="link-dark" type="submit">Delete</button>
+                    </form>
+
                 </td>
             </tr>
         }
