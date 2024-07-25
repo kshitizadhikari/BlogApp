@@ -28,6 +28,7 @@ builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
+builder.Services.AddTransient<Seed>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -48,5 +49,13 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetService<Seed>();
+    await seeder.SeedRolesAsync();
+    await seeder.SeedUsersAsync();
+
+}
 
 app.Run();
