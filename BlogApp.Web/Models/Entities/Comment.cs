@@ -1,7 +1,10 @@
-﻿namespace BlogApp.Web.Models.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace BlogApp.Web.Models.Entities
 {
     public class Comment
     {
+        [Key]
         public int Id { get; set; }
         public string Content { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
