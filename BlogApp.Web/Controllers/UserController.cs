@@ -31,6 +31,7 @@ namespace BlogApp.Web.Controllers
                 var user = await _repositoryWrapper.AppUser.GetById(item.AppUserId);
                 ViewPostVM obj = new ViewPostVM
                 {
+                    Id = item.Id,
                     Title = item.Title,
                     Content = item.Content,
                     AuthorId = user.Id,
@@ -64,6 +65,23 @@ namespace BlogApp.Web.Controllers
             await _repositoryWrapper.Save();
 
             return RedirectToAction("Home");
+        }
+
+        public async Task<IActionResult> ViewPost(int id)
+        {
+            Post? post = await _repositoryWrapper.Post.GetById(id);
+            AppUser? user = await _repositoryWrapper.AppUser.GetById(post.AppUserId);
+
+            ViewPostVM obj = new ViewPostVM
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Content = post.Content,
+                AuthorId = user.Id,
+                Author = user
+            };
+
+            return View(obj);
         }
 
 

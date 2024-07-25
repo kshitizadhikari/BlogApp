@@ -10,6 +10,7 @@
             <th scope="col">#</th>
             <th scope="col">Title</th>
             <th scope="col">Author</th>
+            <th scope="col">Action</th>
         </tr>
     </thead>
     <tbody>
@@ -19,6 +20,7 @@
                 <th scope="row">-</th>
                 <td>@item.Title</td>
                 <td>@item.Author.UserName</td>
+                <td><a asp-controller="User" asp-action="ViewPost" asp-route-id="@item.Id">View</a></td>
             </tr>
         }
     </tbody>

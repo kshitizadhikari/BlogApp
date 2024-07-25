@@ -1,0 +1,11 @@
+﻿@model ViewPostVM
+
+<div class="card border-dark mb-3" style="max-width: 18rem;">
+  <div class="card-header">@Model.Author.UserName</div>
+  <div class="card-body">
+    <h5 class="card-title">@Model.Title</h5>
+    <p class="card-text">@Model.Content</p>
+  </div>
+</div>
+
+<a asp-controller="User" asp-action="Home">Go Back</a>
