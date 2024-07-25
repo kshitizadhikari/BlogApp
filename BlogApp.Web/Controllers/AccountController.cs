@@ -1,4 +1,5 @@
-﻿using BlogApp.Web.Infrastructure.Interfaces;
+﻿using BlogApp.Web.Enums;
+using BlogApp.Web.Infrastructure.Interfaces;
 using BlogApp.Web.Models;
 using BlogApp.Web.Models.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -52,6 +53,37 @@ namespace BlogApp.Web.Controllers
             await _signInManager.SignInAsync(user, true);
             return RedirectToAction("Home", "User");
         }
+
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Register(RegisterVM registerVM)
+        {
+            if (!ModelState.IsValid) return View(registerVM);
+
+            var existingUser = await _userManager.FindByEmailAsync(registerVM.Email);
+            if(existingUser != null)
+            {
+                ModelState.AddModelError("Email", "User with this email already exists");
+                return View(registerVM);
+            }
+            AppUser user = new AppUser
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = registerVM.UserName,
+                Email = registerVM.Email
+            };
+            var result = await _userManager.CreateAsync(user, registerVM.Password);
+            if (!result.Succeeded) return View(registerVM);
+
+            await _userManager.AddToRoleAsync(user, Roles.User.ToString());
+
+            return RedirectToAction("Login");
+        }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
