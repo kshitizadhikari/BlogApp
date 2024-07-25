@@ -14,13 +14,16 @@
         </tr>
     </thead>
     <tbody>
-        @foreach(var item in Model)
+        @foreach (var item in Model)
         {
             <tr>
                 <th scope="row">-</th>
                 <td>@item.Title</td>
                 <td>@item.Author.UserName</td>
-                <td><a asp-controller="User" asp-action="ViewPost" asp-route-id="@item.Id">View</a></td>
+                <td>
+                    <a asp-controller="User" asp-action="ViewPost" asp-route-id="@item.Id">View</a> |
+                    <a asp-controller="User" asp-action="UpdatePost" asp-route-id="@item.Id">Update</a>
+                </td>
             </tr>
         }
     </tbody>

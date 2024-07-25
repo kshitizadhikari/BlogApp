@@ -11,24 +11,24 @@ namespace BlogApp.Web.Controllers
     {
 
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IRepositoryWrapper _repositoryWrapper;
+        private readonly IRepositoryWrapper _repository;
 
         public UserController(IHttpContextAccessor httpContextAccessor, IRepositoryWrapper repositoryWrapper)
         {
             _httpContextAccessor = httpContextAccessor;
-            _repositoryWrapper = repositoryWrapper;
+            _repository = repositoryWrapper;
         }
 
         public async Task<IActionResult> Home()
         {
-            List<Post> posts = await _repositoryWrapper.Post.GetAll().ToListAsync();
+            List<Post> posts = await _repository.Post.GetAll().ToListAsync();
 
             List<ViewPostVM> postsVM = new List<ViewPostVM>();
 
             foreach(var item in posts)
             {
 
-                var user = await _repositoryWrapper.AppUser.GetById(item.AppUserId);
+                var user = await _repository.AppUser.GetById(item.AppUserId);
                 ViewPostVM obj = new ViewPostVM
                 {
                     Id = item.Id,
@@ -49,7 +49,7 @@ namespace BlogApp.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreatePost(CreatePostVM obj)
+        public async Task<IActionResult> CreatePost(PostVM obj)
         {
             var curUserId = _httpContextAccessor.HttpContext.User.GetUserId();
             if (!ModelState.IsValid) return View(obj);
@@ -61,16 +61,16 @@ namespace BlogApp.Web.Controllers
                 AppUserId = curUserId
             };
 
-            _repositoryWrapper.Post.Create(post);
-            await _repositoryWrapper.Save();
+            _repository.Post.Create(post);
+            await _repository.Save();
 
             return RedirectToAction("Home");
         }
 
         public async Task<IActionResult> ViewPost(int id)
         {
-            Post? post = await _repositoryWrapper.Post.GetById(id);
-            AppUser? user = await _repositoryWrapper.AppUser.GetById(post.AppUserId);
+            Post? post = await _repository.Post.GetById(id);
+            AppUser? user = await _repository.AppUser.GetById(post.AppUserId);
 
             ViewPostVM obj = new ViewPostVM
             {
@@ -84,6 +84,30 @@ namespace BlogApp.Web.Controllers
             return View(obj);
         }
 
+        public async Task<IActionResult> UpdatePost(int id)
+        {
+            Post? post = await _repository.Post.GetById(id);
+            PostVM postVM = new PostVM
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Content = post.Content
+            };
+            return View(postVM);
+        }
 
+        [HttpPost]
+        public async Task<IActionResult> UpdatePost(PostVM obj)
+        {
+            if (!ModelState.IsValid) return View(obj);
+
+            Post? post = await _repository.Post.GetById(obj.Id);
+            post.Title = obj.Title;
+            post.Content = obj.Content;
+            _repository.Post.Update(post);
+            await _repository.Save();
+
+            return RedirectToAction("Home");
+        }
     }
 }

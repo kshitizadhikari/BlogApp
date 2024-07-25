@@ -3,8 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BlogApp.Web.Models
 {
-    public class CreatePostVM
+    public class PostVM
     {
+        public int Id { get; set; }
         [Required]
         public string Title { get; set; }
         [Required]
