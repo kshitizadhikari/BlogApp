@@ -50,7 +50,7 @@ namespace BlogApp.Web.Controllers
             }
 
             await _signInManager.SignInAsync(user, true);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Home", "User");
         }
 
         [HttpPost]

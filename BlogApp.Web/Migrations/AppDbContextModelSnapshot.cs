@@ -118,7 +118,7 @@ namespace BlogApp.Web.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("BlogApp.Web.Models.Entities.Post", b =>
@@ -151,7 +151,7 @@ namespace BlogApp.Web.Migrations
 
                     b.HasIndex("AppUserId");
 
-                    b.ToTable("Posts");
+                    b.ToTable("Posts", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
