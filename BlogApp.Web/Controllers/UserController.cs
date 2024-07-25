@@ -20,6 +20,7 @@ namespace BlogApp.Web.Controllers
 
         public IActionResult Home()
         {
+
             return View("Home");
         }
 
@@ -32,7 +33,7 @@ namespace BlogApp.Web.Controllers
         public async Task<IActionResult> CreatePost(CreatePostVM obj)
         {
             var curUserId = _httpContextAccessor.HttpContext.User.GetUserId();
-            if (!ModelState.IsValid) return View("Home", obj);
+            if (!ModelState.IsValid) return View(obj);
 
             Post post = new Post
             {
@@ -46,5 +47,7 @@ namespace BlogApp.Web.Controllers
 
             return RedirectToAction("Home");
         }
+
+
     }
 }
