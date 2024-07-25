@@ -1,4 +1,25 @@
-﻿<h1>Home View</h1>
+﻿@model List<ViewPostVM>
+
+<h1>Home View</h1>
 
 <a asp-controller="User" asp-action="CreatePost">Add Post</a>
 
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Title</th>
+            <th scope="col">Author</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var item in Model)
+        {
+            <tr>
+                <th scope="row">-</th>
+                <td>@item.Title</td>
+                <td>@item.Author.UserName</td>
+            </tr>
+        }
+    </tbody>
+</table>
