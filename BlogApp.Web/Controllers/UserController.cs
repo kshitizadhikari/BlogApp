@@ -22,7 +22,6 @@ namespace BlogApp.Web.Controllers
         public async Task<IActionResult> Home()
         {
             List<Post> posts = await _repository.Post.GetAll().ToListAsync();
-
             List<ViewPostVM> postsVM = new List<ViewPostVM>();
 
             foreach(var item in posts)
