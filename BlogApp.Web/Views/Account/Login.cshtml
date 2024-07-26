@@ -13,6 +13,10 @@
         <input type="password" asp-for="Password" class="form-control" />
         <span asp-validation-for="Password" class="text-danger"></span>
     </div>
+    <div>
+        <input asp-for="RememberMe" type="checkbox" />
+        <label asp-for="RememberMe">Remember me</label>
+    </div>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 

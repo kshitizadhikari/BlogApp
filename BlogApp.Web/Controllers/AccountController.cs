@@ -2,8 +2,11 @@
 using BlogApp.Web.Infrastructure.Interfaces;
 using BlogApp.Web.Models;
 using BlogApp.Web.Models.Entities;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BlogApp.Web.Controllers
 {
@@ -30,29 +33,50 @@ namespace BlogApp.Web.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("Email", "Invalid Email or Password");
                 return View(loginVM);
             }
 
-            AppUser user = await _userManager.FindByEmailAsync(loginVM.Email);
+            var user = await _userManager.FindByEmailAsync(loginVM.Email);
 
-            if (user == null)
+            if (user == null || !await _userManager.CheckPasswordAsync(user, loginVM.Password))
             {
-                ModelState.AddModelError("Email", "Invalid Email or Password");
+                // Avoid revealing whether email or password is incorrect for security reasons
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                 return View(loginVM);
             }
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, loginVM.Password, false);
+            var result = await _signInManager.PasswordSignInAsync(user, loginVM.Password, loginVM.RememberMe, lockoutOnFailure: false);
 
-            if(result == null)
+            if (!result.Succeeded)
             {
-                ModelState.AddModelError("Email", "Invalid Email or Password");
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                 return View(loginVM);
             }
 
-            await _signInManager.SignInAsync(user, true);
+            // Create user claims
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Email, user.Email)
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = loginVM.RememberMe,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30) // Cookie expiration set to 30 days
+            };
+
+            // Set session data
             HttpContext.Session.SetString("user_id", user.Id);
-            return RedirectToAction("Home", "User");
+            HttpContext.Session.SetString("username", user.UserName);
+
+            // Sign in the user
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+
+            return RedirectToAction("Index", "Home");
         }
 
         public IActionResult Register()
@@ -66,30 +90,39 @@ namespace BlogApp.Web.Controllers
             if (!ModelState.IsValid) return View(registerVM);
 
             var existingUser = await _userManager.FindByEmailAsync(registerVM.Email);
-            if(existingUser != null)
+            if (existingUser != null)
             {
-                ModelState.AddModelError("Email", "User with this email already exists");
+                ModelState.AddModelError("Email", "User with this email already exists.");
                 return View(registerVM);
             }
-            AppUser user = new AppUser
+
+            var user = new AppUser
             {
                 Id = Guid.NewGuid().ToString(),
                 UserName = registerVM.UserName,
                 Email = registerVM.Email
             };
+
             var result = await _userManager.CreateAsync(user, registerVM.Password);
-            if (!result.Succeeded) return View(registerVM);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return View(registerVM);
+            }
 
             await _userManager.AddToRoleAsync(user, Roles.User.ToString());
 
             return RedirectToAction("Login");
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
+            HttpContext.Session.Clear();
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login");
         }
