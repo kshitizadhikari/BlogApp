@@ -23,6 +23,7 @@ namespace BlogApp.Web.Controllers
             _signInManager = signInManager;
         }
 
+
         public IActionResult Login()
         {
             return View();
@@ -36,12 +37,11 @@ namespace BlogApp.Web.Controllers
                 return View(loginVM);
             }
 
-            var user = await _userManager.FindByEmailAsync(loginVM.Email);
+            AppUser? user = await _userManager.FindByEmailAsync(loginVM.Email);
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, loginVM.Password))
             {
-                // Avoid revealing whether email or password is incorrect for security reasons
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                ModelState.AddModelError(string.Empty, "Invalid email or password.");
                 return View(loginVM);
             }
 
@@ -53,29 +53,8 @@ namespace BlogApp.Web.Controllers
                 return View(loginVM);
             }
 
-            // Create user claims
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Email, user.Email)
-            };
-
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-            var authProperties = new AuthenticationProperties
-            {
-                IsPersistent = loginVM.RememberMe,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30) // Cookie expiration set to 30 days
-            };
-
-            // Set session data
-            HttpContext.Session.SetString("user_id", user.Id);
-            HttpContext.Session.SetString("username", user.UserName);
-
-            // Sign in the user
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
-
+            SetUserSession(user);
+            await SignInUserAsync(user, loginVM.RememberMe);
             return RedirectToAction("Index", "Home");
         }
 
@@ -126,5 +105,44 @@ namespace BlogApp.Web.Controllers
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login");
         }
+
+        private void SetUserSession(AppUser user)
+        {
+            // Set session data
+            HttpContext.Session.SetString("user_id", user.Id);
+            HttpContext.Session.SetString("username", user.UserName);
+        }
+
+        private void ClearUserSession()
+        {
+            HttpContext.Session.Clear();
+        }
+
+        private async Task SignInUserAsync(AppUser user, bool isPersistent)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Email, user.Email)
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = isPersistent,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30) // Cookie expiration set to 30 days
+            };
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+        }
+
+        private async Task SignOutUserAsync()
+        {
+            await _signInManager.SignOutAsync();
+            ClearUserSession();
+        }
+
     }
 }
