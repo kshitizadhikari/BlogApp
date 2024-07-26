@@ -72,6 +72,12 @@ namespace BlogApp.Web.Controllers
             AppUser? user = await _repository.AppUser.GetById(post.AppUserId);
             List<Comment> comments = _repository.Post.GetComments(id);
 
+            foreach ( var item in comments)
+            {
+                AppUser? commentor = await _repository.AppUser.GetById(item.AppUserId);
+                item.AppUser = commentor;
+            }
+
             ViewPostVM obj = new ViewPostVM
             {
                 Id = post.Id,

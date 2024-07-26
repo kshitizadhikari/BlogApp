@@ -9,7 +9,7 @@
 </div>
 @foreach (var comment in Model.Comments)
 {
-    <p>@comment.Content</p>
+    <span>@comment.AppUser.UserName</span> <p>@comment.Content</p>
 }
 
 <form asp-controller="User" asp-action="AddComment" method="post">
