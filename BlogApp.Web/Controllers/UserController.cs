@@ -4,6 +4,7 @@ using BlogApp.Web.Models;
 using BlogApp.Web.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Nodes;
 
 namespace BlogApp.Web.Controllers
 {
@@ -110,6 +111,19 @@ namespace BlogApp.Web.Controllers
                 comment = comment
             });
         }
+
+        public async Task<JsonResult> GetComments(int postId)
+        {
+            // Retrieve the comments from the repository
+            List<Comment> allComments = _repository.Post.GetComments(postId);
+
+            // Return the comments as a JSON result
+            return Json(new
+            {
+                comments = allComments
+            });
+        }
+
 
         public async Task<IActionResult> UpdatePost(int id)
         {
