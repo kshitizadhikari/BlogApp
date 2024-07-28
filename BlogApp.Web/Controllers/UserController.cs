@@ -101,10 +101,14 @@ namespace BlogApp.Web.Controllers
                 PostId = postId,
                 AppUserId = userId
             };
-
+            var username = HttpContext.Session.GetString("username");
             _repository.Comment.Create(obj);
             await _repository.Save();
-            return RedirectToAction("ViewPost", new { id = postId });
+            return Json(new
+            {
+                username = username,
+                comment = comment
+            });
         }
 
         public async Task<IActionResult> UpdatePost(int id)

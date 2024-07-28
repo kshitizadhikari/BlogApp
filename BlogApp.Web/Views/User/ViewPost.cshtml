@@ -1,28 +1,63 @@
 ﻿@model ViewPostVM
 
 <div class="card border-dark mb-3" style="max-width: 18rem;">
-  <div class="card-header">@Model.Author.UserName</div>
-  <div class="card-body">
-    <h5 class="card-title">@Model.Title</h5>
-    <p class="card-text">@Model.Content</p>
-  </div>
+    <div class="card-header">@Model.Author.UserName</div>
+    <div class="card-body">
+        <h5 class="card-title">@Model.Title</h5>
+        <p class="card-text">@Model.Content</p>
+    </div>
 </div>
-@foreach (var comment in Model.Comments)
-{
-    <span>@comment.AppUser.UserName</span> <p>@comment.Content</p>
-}
+<div class="commentSection">
+    @foreach (var comment in Model.Comments)
+    {
+        <span>@comment.AppUser.UserName</span> <p>@comment.Content</p>
+    }
+</div>
 
-<form asp-controller="User" asp-action="AddComment" method="post">
+<form id="commentForm" method="post">
     <div class="mb-3">
-        <input type="hidden" name="postId" value="@Model.Id" />
+        <input type="hidden" name="postId" id="postId" value="@Model.Id" />
         <label asp-for="Comment" class="control-label"></label>
-        <input type="text" asp-for="Comment" class="form-control" required />
+        <input type="text" asp-for="Comment" name="comment" id="comment" class="form-control" required />
         <span asp-validation-for="Comment" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-primary">Add Comment</button>
+    <button id="addCmtBtn" type="button" class="btn btn-primary">Add Comment</button>
 </form>
 
 <a asp-controller="User" asp-action="Home">Go Back</a>
 
 <!-- Include validation scripts -->
 <partial name="_ValidationScriptsPartial" />
+<script>
+    $(document).ready(function () {
+        $('#addCmtBtn').on('click', function (e) {
+            console.log("addCmtBtnClicked");
+
+            var postId = $('#postId').val();
+            var comment = $('#comment').val();
+
+            $.ajax({
+                url: '@Url.Action("AddComment", "User")',
+                type: 'POST',
+                data: {
+                    postId: postId,
+                    comment: comment
+                },
+                success: function (response) {
+                    // Handle success response
+                    // For example, append the new comment to the comments list
+                    console.log('Comment added successfully');
+                    $('#comment').val(''); // Clear the input field after success
+
+                },
+                error: function (xhr, status, error) {
+                    // Handle error response
+                    console.error('Error adding comment:', error);
+                }
+            });
+
+            // Prevent default form submission
+            e.preventDefault();
+        });
+    });
+</script>
