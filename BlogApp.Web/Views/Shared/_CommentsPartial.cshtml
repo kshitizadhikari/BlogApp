@@ -1,6 +1,25 @@
 ﻿@model List<BlogApp.Web.Models.CommentVM>
 
+@{
+    var username = Context.Session.GetString("username");
+}
+
 @foreach (var item in Model)
 {
-    <span>@item.UserName</span><p>@item.Content</p>
+    if (username == item.UserName)
+    {
+        <span class="text-black-50">@item.UserName</span>
+        <p>
+            @item.Content - Edit | <form asp-controller="User" asp-action="DeleteUserComment" method="post">
+                <input type="hidden" name="id" value="@item.Id" />
+                <button type="submit">Delete</button>
+            </form>
+        </p>
+    }
+    else
+    {
+        <span class="text-black-50">@item.UserName</span>
+        <p>@item.Content</p>
+    }
+
 }

@@ -9,22 +9,7 @@
         <p class="card-text">@Model.Content</p>
     </div>
 </div>
-@* <div class="commentSection">
-    @foreach (var comment in Model.Comments)
-    {
-        if(user_id == comment.AppUserId)
-        {
-            <span>@comment.AppUser.UserName</span> <p>@comment.Content - Modify / Delete ?</p>
 
-        } else
-        {
-            <span>@comment.AppUser.UserName</span> <p>@comment.Content</p>
-
-        }
-    }
-    <div class="commentSectionAjax" id="commentSectionAjax">
-    </div>
-</div> *@
 <div class="partialViewContainer" id="partialViewContainer">
 
 </div>
@@ -76,10 +61,6 @@
                     comment: comment
                 },
                 success: function (response) {
-                    // Append the new comment to the comments list
-                    $('#commentSectionAjax').append(
-                        '<div class="newComment"><span>' + response.username + '</span> <p>' + response.comment + '</p></div>'
-                    );
                     $('#comment').val(''); // Clear the input field after success
                     loadComments(); // Reload comments
                 },

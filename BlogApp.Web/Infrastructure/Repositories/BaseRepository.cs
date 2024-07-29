@@ -13,22 +13,19 @@ namespace BlogApp.Web.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public bool Create(T entity)
+        public async Task Create(T entity)
         {
             _dbContext.Set<T>().Add(entity);
-            return true;
         }
 
-        public bool Update(T entity)
+        public async Task Update(T entity)
         {
             _dbContext.Set<T>().Update(entity);
-            return true;
         }
 
-        public bool Delete(T entity)
+        public async Task Delete(T entity)
         {
             _dbContext.Set<T>().Remove(entity);
-            return true;
         }
 
         public IQueryable<T> GetAll()

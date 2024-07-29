@@ -103,7 +103,7 @@ namespace BlogApp.Web.Controllers
                 AppUserId = userId
             };
             var username = HttpContext.Session.GetString("username");
-            _repository.Comment.Create(obj);
+            await _repository.Comment.Create(obj);
             await _repository.Save();
             return Json(new
             {
@@ -147,6 +147,13 @@ namespace BlogApp.Web.Controllers
             }
         }
 
+        public async Task<IActionResult> DeleteUserComment(int id)
+        {
+            Comment? comment = await _repository.Comment.GetById(id);
+            await _repository.Comment.Delete(comment);
+            await _repository.Save();
+            return RedirectToAction("Home");
+        }
 
         public async Task<IActionResult> UpdatePost(int id)
         {
@@ -168,7 +175,7 @@ namespace BlogApp.Web.Controllers
             Post? post = await _repository.Post.GetById(obj.Id);
             post.Title = obj.Title;
             post.Content = obj.Content;
-            _repository.Post.Update(post);
+            await _repository.Post.Update(post);
             await _repository.Save();
 
             return RedirectToAction("Home");
@@ -178,7 +185,7 @@ namespace BlogApp.Web.Controllers
         public async Task<IActionResult> DeletePost(int id)
         {
             Post? post = await _repository.Post.GetById(id);
-            _repository.Post.Delete(post);
+            await _repository.Post.Delete(post);
             await _repository.Save();
             return RedirectToAction("Home");
         }

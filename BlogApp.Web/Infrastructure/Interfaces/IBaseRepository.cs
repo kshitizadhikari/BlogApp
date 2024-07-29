@@ -2,9 +2,9 @@
 {
     public interface IBaseRepository<T> where T : class
     {
-        bool Create(T entity);
-        bool Update(T entity);
-        bool Delete(T entity);
+        Task Create(T entity);
+        Task Update(T entity);
+        Task Delete(T entity);
 
         IQueryable<T> GetAll();
 
