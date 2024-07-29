@@ -147,12 +147,11 @@ namespace BlogApp.Web.Controllers
             }
         }
 
-        public async Task<IActionResult> DeleteUserComment(int id)
+        public async Task DeleteUserComment(int id)
         {
             Comment? comment = await _repository.Comment.GetById(id);
             await _repository.Comment.Delete(comment);
             await _repository.Save();
-            return RedirectToAction("Home");
         }
 
         public async Task<IActionResult> UpdatePost(int id)

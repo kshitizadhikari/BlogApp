@@ -10,10 +10,9 @@
     {
         <span class="text-black-50">@item.UserName</span>
         <p>
-            @item.Content - Edit | <form asp-controller="User" asp-action="DeleteUserComment" method="post">
-                <input type="hidden" name="id" value="@item.Id" />
-                <button type="submit">Delete</button>
-            </form>
+            @item.Content |  <button type="button" class="editBtn" data-id="@item.Id">Edit</button>
+            <button type="button" class="delCmtBtn" data-id="@item.Id">Delete</button>
+
         </p>
     }
     else
