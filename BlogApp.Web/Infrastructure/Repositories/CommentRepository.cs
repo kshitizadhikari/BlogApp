@@ -9,5 +9,13 @@ namespace BlogApp.Web.Infrastructure.Repositories
         public CommentRepository(AppDbContext dbContext) : base(dbContext)
         {
         }
+
+        public async Task<string> GetCommentorName(int id)
+        {
+            Comment? obj = await _dbContext.Comments.FindAsync(id);
+            AppUser? commentor = await _dbContext.Users.FindAsync(obj.AppUserId);
+
+            return commentor.UserName;
+        }
     }
 }
