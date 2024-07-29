@@ -63,14 +63,38 @@
             });
         });
 
+        //display edit form for a particular comment
         $('#partialViewContainer').on('click', '.editCmtBtn', function (e) {
-
-            //display edit form for a particular comment
             var commentId = $(this).data('id');
             $("#editForm-" + commentId).show();
         });
 
-        
+
+        $('#partialViewContainer').on('click', '.saveCmtBtn', function (e) {
+            var commentId = $(this).data('id');
+            var content = $("#editContent-" + commentId).val();
+            $.ajax({
+                url: '@Url.Action("EditUserComment", "User")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    Id: commentId,
+                    Content: content
+                }),
+                success: function() {
+                    loadComments();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error updating comment:', error);
+                }
+            });
+        });
+
+        $('#partialViewContainer').on('click', '.cancelCmtBtn', function (e) {
+            var commentId = $(this).data('id');
+            $("#editForm-" + commentId).hide();
+
+        });
 
         $('#addCmtBtn').on('click', function (e) {
             e.preventDefault(); // Prevent default form submission
