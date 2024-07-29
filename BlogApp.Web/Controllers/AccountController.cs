@@ -41,7 +41,7 @@ namespace BlogApp.Web.Controllers
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, loginVM.Password))
             {
-                ModelState.AddModelError(string.Empty, "Invalid email or password.");
+                ModelState.AddModelError("Email", "Invalid email or password.");
                 return View(loginVM);
             }
 
@@ -49,7 +49,7 @@ namespace BlogApp.Web.Controllers
 
             if (!result.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                ModelState.AddModelError("Email", "Invalid login attempt.");
                 return View(loginVM);
             }
 

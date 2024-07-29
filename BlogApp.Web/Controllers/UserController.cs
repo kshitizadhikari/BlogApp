@@ -71,7 +71,7 @@ namespace BlogApp.Web.Controllers
         {
             Post? post = await _repository.Post.GetById(id);
             AppUser? user = await _repository.AppUser.GetById(post.AppUserId);
-            List<Comment> comments = _repository.Post.GetComments(id);
+            List<Comment> comments = await _repository.Post.GetComments(id);
 
             foreach ( var item in comments)
             {
@@ -112,16 +112,39 @@ namespace BlogApp.Web.Controllers
             });
         }
 
-        public async Task<JsonResult> GetComments(int postId)
+        public async Task<IActionResult> LoadCommentsPartialView(int postId)
         {
-            // Retrieve the comments from the repository
-            List<Comment> allComments = _repository.Post.GetComments(postId);
-
-            // Return the comments as a JSON result
-            return Json(new
+            try
             {
-                comments = allComments
-            });
+                // Retrieve the comments from the repository
+                List<Comment> allComments = await _repository.Post.GetComments(postId);
+                List<CommentVM> comments = new List<CommentVM>();
+
+                foreach(var item in allComments)
+                {
+                    string username = await _repository.Comment.GetCommentorName(item.Id);
+                    CommentVM comment = new CommentVM
+                    {
+                        Id = item.Id,
+                        Content = item.Content,
+                        PostId = item.PostId,
+                        UserName = item.AppUser.UserName
+                    };
+                    comments.Add(comment);
+                }
+
+
+                // Use the correct path format with a tilde (~)
+                return PartialView("_CommentsPartial", comments);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (consider using a logging framework)
+                Console.Error.WriteLine($"Error loading comments: {ex.Message}");
+
+                // Return a user-friendly error message or view
+                return StatusCode(500, "Internal server error while loading comments.");
+            }
         }
 
 

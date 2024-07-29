@@ -10,7 +10,7 @@ namespace BlogApp.Web.Infrastructure.Repositories
         {
         }
 
-        public List<Comment> GetComments(int postId)
+        public async Task<List<Comment>> GetComments(int postId)
         {
             return _dbContext.Comments.Where(c => c.PostId == postId).ToList();
         }

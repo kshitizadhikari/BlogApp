@@ -1,6 +1,7 @@
 ﻿using BlogApp.Web.Models.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using BlogApp.Web.Models;
 
 namespace BlogApp.Web.Data
 {
@@ -34,5 +35,6 @@ namespace BlogApp.Web.Data
                 .HasForeignKey(c => c.AppUserId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
+        public DbSet<BlogApp.Web.Models.CommentVM> CommentVM { get; set; } = default!;
     }
 }

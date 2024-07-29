@@ -1,0 +1,6 @@
+﻿@model List<BlogApp.Web.Models.CommentVM>
+
+@foreach (var item in Model)
+{
+    <span>@item.UserName</span><p>@item.Content</p>
+}

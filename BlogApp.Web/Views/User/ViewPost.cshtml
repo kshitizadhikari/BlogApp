@@ -1,5 +1,7 @@
 ﻿@model ViewPostVM
-
+@{
+    var user_id = Context.Session.GetString("user_id");
+}
 <div class="card border-dark mb-3" style="max-width: 18rem;">
     <div class="card-header">@Model.Author.UserName</div>
     <div class="card-body">
@@ -7,16 +9,25 @@
         <p class="card-text">@Model.Content</p>
     </div>
 </div>
-<div class="commentSection">
+@* <div class="commentSection">
     @foreach (var comment in Model.Comments)
     {
-        <span>@comment.AppUser.UserName</span> <p>@comment.Content</p>
+        if(user_id == comment.AppUserId)
+        {
+            <span>@comment.AppUser.UserName</span> <p>@comment.Content - Modify / Delete ?</p>
+
+        } else
+        {
+            <span>@comment.AppUser.UserName</span> <p>@comment.Content</p>
+
+        }
     }
     <div class="commentSectionAjax" id="commentSectionAjax">
     </div>
+</div> *@
+<div class="partialViewContainer" id="partialViewContainer">
+
 </div>
-
-
 
 <form id="commentForm" method="post">
     <div class="mb-3">
@@ -34,10 +45,26 @@
 <partial name="_ValidationScriptsPartial" />
 <script>
     $(document).ready(function () {
+        // Load comments on page load
+        loadComments();
+
+        // Function to load comments
+        function loadComments() {
+            $.ajax({
+                url: '@Url.Action("LoadCommentsPartialView", "User")',
+                type: 'GET',
+                data: { postId: @Model.Id },
+                success: function (response) {
+                    $('#partialViewContainer').html(response);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading partial view:', error);
+                }
+            });
+        }
 
         $('#addCmtBtn').on('click', function (e) {
-            console.log("addCmtBtnClicked");
-            $("#commentSection").hide();
+            e.preventDefault(); // Prevent default form submission
             var postId = $('#postId').val();
             var comment = $('#comment').val();
 
@@ -49,30 +76,18 @@
                     comment: comment
                 },
                 success: function (response) {
-                    // Handle success response
-                    // For example, append the new comment to the comments list
-                    console.log('Comment added successfully');
+                    // Append the new comment to the comments list
                     $('#commentSectionAjax').append(
-                        '<div><span>' + response.username + '</span> <p>' + response.comment + '</p></div>'
+                        '<div class="newComment"><span>' + response.username + '</span> <p>' + response.comment + '</p></div>'
                     );
                     $('#comment').val(''); // Clear the input field after success
-
+                    loadComments(); // Reload comments
                 },
                 error: function (xhr, status, error) {
-                    // Handle error response
                     console.error('Error adding comment:', error);
                 }
             });
-
-            // Prevent default form submission
-            e.preventDefault();
         });
-
-        //replace comment section using ajax
-        $.ajax({
-             
-        });
-
-
     });
+
 </script>
