@@ -10,10 +10,15 @@
     {
         <span class="text-black-50">@item.UserName</span>
         <p>
-            @item.Content |  <button type="button" class="editBtn" data-id="@item.Id">Edit</button>
+            @item.Content |  <button type="button" class="editCmtBtn" data-id="@item.Id">Edit</button>
             <button type="button" class="delCmtBtn" data-id="@item.Id">Delete</button>
-
         </p>
+
+        <div class="editForm" id="editForm-@item.Id" style="display:none">
+            <input class="editContent" id="editContent-@item.Id" value="@item.Content" />
+            <button type="button" class="saveCmtBtn" data-id="@item.Id">Save</button>
+            <button type="button" class="cancelCmtBtn" data-id="@item.Id">Cancel</button>
+        </div>
     }
     else
     {

@@ -49,9 +49,7 @@
 
         // Use event delegation to handle delete button clicks
         $('#partialViewContainer').on('click', '.delCmtBtn', function (e) {
-            e.preventDefault();
             var commentId = $(this).data('id');
-            console.log($(this).data);
             $.ajax({
                 url: '@Url.Action("DeleteUserComment", "User")',
                 type: 'POST',
@@ -64,6 +62,15 @@
                 }
             });
         });
+
+        $('#partialViewContainer').on('click', '.editCmtBtn', function (e) {
+
+            //display edit form for a particular comment
+            var commentId = $(this).data('id');
+            $("#editForm-" + commentId).show();
+        });
+
+        
 
         $('#addCmtBtn').on('click', function (e) {
             e.preventDefault(); // Prevent default form submission
@@ -86,6 +93,8 @@
                 }
             });
         });
+
+
     });
 
 </script>

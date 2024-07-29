@@ -154,6 +154,16 @@ namespace BlogApp.Web.Controllers
             await _repository.Save();
         }
 
+        public async Task EditUserComment(EditCommentVM editCommentVM)
+        {
+            Comment? comment = await _repository.Comment.GetById(editCommentVM.Id);
+
+            comment.Content = editCommentVM.Content;
+            await _repository.Comment.Update(comment);
+            await _repository.Save();
+        }
+
+
         public async Task<IActionResult> UpdatePost(int id)
         {
             Post? post = await _repository.Post.GetById(id);
