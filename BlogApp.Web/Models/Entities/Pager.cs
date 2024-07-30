@@ -28,13 +28,22 @@
                 startPage = 1;
             }
 
-            if (endPage > 10)
+            //if (endPage > 10)
+            //{
+            //    if(endPage > totalPages)
+            //    {
+            //        endPage = totalPages;
+            //    }
+            //    startPage = endPage - 9;
+            //}
+
+            if (endPage > totalPages)
             {
-                if(endPage > totalPages)
+                endPage = totalPages;
+                if(endPage > 10)
                 {
-                    endPage = totalPages;
+                    startPage = endPage - 9;
                 }
-                startPage = endPage - 9;
             }
 
             TotalItems = totalItems;
