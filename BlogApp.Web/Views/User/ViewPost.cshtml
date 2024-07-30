@@ -82,6 +82,7 @@
                     Content: content
                 }),
                 success: function() {
+                    $("#editForm-" + commentId).hide();
                     loadComments();
                 },
                 error: function (xhr, status, error) {

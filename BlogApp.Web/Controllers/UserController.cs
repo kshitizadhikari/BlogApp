@@ -1,11 +1,9 @@
 ﻿using BlogApp.Web.Extensions;
-using BlogApp.Web.Helpers;
 using BlogApp.Web.Infrastructure.Interfaces;
 using BlogApp.Web.Models;
 using BlogApp.Web.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Nodes;
 
 namespace BlogApp.Web.Controllers
 {
