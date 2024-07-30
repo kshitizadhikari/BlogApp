@@ -19,12 +19,27 @@ namespace BlogApp.Web.Controllers
             _repository = repositoryWrapper;
         }
 
-        public async Task<IActionResult> Home()
+        public async Task<IActionResult> Home(int pg=1)
         {
             List<Post> posts = await _repository.Post.GetAll().ToListAsync();
+
+            const int pageSize = 10;
+
+            //if user types pg less than 1 from browser.. handling it
+            if (pg < 1) pg = 1;
+
+            //get the total number of posts
+            int recsCount = posts.Count();
+
+            //identify the start index for next or prev page
+            int recsSkip = (pg - 1) * pageSize;
+
+            Pager pager = new Pager(recsCount, pg, pageSize);
+            var data = posts.Skip(recsSkip).Take(pager.PageSize).ToList();
+
             List<ViewPostVM> postsVM = new List<ViewPostVM>();
 
-            foreach(var item in posts)
+            foreach(var item in data)
             {
 
                 var user = await _repository.AppUser.GetById(item.AppUserId);
@@ -38,7 +53,7 @@ namespace BlogApp.Web.Controllers
                 };
                 postsVM.Add(obj);
             }
-
+            this.ViewBag.pager = pager;
             return View("Home", postsVM);
         }
 
