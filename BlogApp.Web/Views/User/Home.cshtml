@@ -4,51 +4,36 @@
 <h1>Home View</h1>
 @{
     var user_id = Context.Session.GetString("user_id");
-
-    Pager pager = new Pager();
-    int pageNo = 0;
-    if (ViewBag.pager != null)
-    {
-        pager = ViewBag.pager;
-        pageNo = pager.CurrentPage;
-
-    }
 }
 @user_id
 <a asp-controller="User" asp-action="CreatePost">Add Post</a>
-<table class="table">
-    <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Title</th>
-            <th scope="col">Author</th>
-            <th scope="col">Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <th scope="row">-</th>
-                <td>@item.Title</td>
-                <td>@item.Author.UserName</td>
-                <td>
-                    <a asp-controller="User" asp-action="ViewPost" asp-route-id="@item.Id">View</a>
-                    @if (user_id == item.Author.Id)
-                    {
-                        <span>| </span>
-                        <a asp-controller="User" asp-action="UpdatePost" asp-route-id="@item.Id">Update</a>
-                        <form asp-controller="User" asp-action="DeletePost" method="post">
-                            <input type="hidden" name="id" value="@item.Id" />
-                            <button class="link-dark" type="submit">Delete</button>
-                        </form>
-                    }
 
+<div class="post-container">
 
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+</div>
 
-<partial name="_PostPaginationPartial" model="@pager"/>
+<script>
+    $(document).ready(function () {
+        loadPostData();
+
+        $('.post-container').on('click', '.page-link', function (e) {
+            var curPage = $(this).data('page');
+            console.log(curPage);
+            loadPostData(curPage);
+        });
+    });
+
+    function loadPostData(page=1) {
+        $.ajax({
+            url: '@Url.Action("LoadPostDataPartialView", "User")',
+            type: 'GET',
+            data: {pg: page},
+            success: function(response) {
+                $('.post-container').html(response);
+            },
+            error: function (xhr, status, error) {
+                console.error('Error loading Post Data:', error);
+            }
+        });
+    }
+</script>

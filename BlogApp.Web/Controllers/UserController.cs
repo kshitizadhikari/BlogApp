@@ -21,40 +21,7 @@ namespace BlogApp.Web.Controllers
 
         public async Task<IActionResult> Home(int pg=1)
         {
-            List<Post> posts = await _repository.Post.GetAll().ToListAsync();
-
-            const int pageSize = 3;
-
-            //if user types pg less than 1 from browser.. handling it
-            if (pg < 1) pg = 1;
-
-            //get the total number of posts
-            int recsCount = posts.Count();
-
-            //identify the start index for next or prev page
-            int recsSkip = (pg - 1) * pageSize;
-
-            Pager pager = new Pager(recsCount, pg, pageSize);
-            var data = posts.Skip(recsSkip).Take(pager.PageSize).ToList();
-
-            List<ViewPostVM> postsVM = new List<ViewPostVM>();
-
-            foreach(var item in data)
-            {
-
-                var user = await _repository.AppUser.GetById(item.AppUserId);
-                ViewPostVM obj = new ViewPostVM
-                {
-                    Id = item.Id,
-                    Title = item.Title,
-                    Content = item.Content,
-                    AuthorId = user.Id,
-                    Author = user
-                };
-                postsVM.Add(obj);
-            }
-            this.ViewBag.pager = pager;
-            return View(postsVM);
+            return View();
         }
 
         public async Task<IActionResult> CreatePost()
@@ -126,6 +93,44 @@ namespace BlogApp.Web.Controllers
             });
         }
 
+
+        public async Task<IActionResult> LoadPostDataPartialView(int pg)
+        {
+            List<Post> posts = await _repository.Post.GetAll().ToListAsync();
+
+            const int pageSize = 3;
+
+            //if user types pg less than 1 from browser.. handling it
+            if (pg < 1) pg = 1;
+
+            //get the total number of posts
+            int recsCount = posts.Count();
+
+            //identify the start index for next or prev page
+            int recsSkip = (pg - 1) * pageSize;
+
+            Pager pager = new Pager(recsCount, pg, pageSize);
+            var data = posts.Skip(recsSkip).Take(pager.PageSize).ToList();
+
+            List<ViewPostVM> postsVM = new List<ViewPostVM>();
+
+            foreach (var item in data)
+            {
+
+                var user = await _repository.AppUser.GetById(item.AppUserId);
+                ViewPostVM obj = new ViewPostVM
+                {
+                    Id = item.Id,
+                    Title = item.Title,
+                    Content = item.Content,
+                    AuthorId = user.Id,
+                    Author = user
+                };
+                postsVM.Add(obj);
+            }
+            this.ViewBag.pager = pager;
+            return PartialView("_PostTablePartial", postsVM);
+        }
         public async Task<IActionResult> LoadCommentsPartialView(int postId)
         {
             try
