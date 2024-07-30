@@ -23,7 +23,7 @@ namespace BlogApp.Web.Controllers
         {
             List<Post> posts = await _repository.Post.GetAll().ToListAsync();
 
-            const int pageSize = 10;
+            const int pageSize = 3;
 
             //if user types pg less than 1 from browser.. handling it
             if (pg < 1) pg = 1;

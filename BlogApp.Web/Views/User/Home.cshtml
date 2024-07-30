@@ -1,8 +1,18 @@
-﻿
+﻿@using BlogApp.Web.Models.Entities
+
 @model List<ViewPostVM>
 <h1>Home View</h1>
 @{
     var user_id = Context.Session.GetString("user_id");
+
+    Pager pager = new Pager();
+    int pageNo = 0;
+    if (ViewBag.pager != null)
+    {
+        pager = ViewBag.pager;
+        pageNo = pager.CurrentPage;
+
+    }
 }
 @user_id
 <a asp-controller="User" asp-action="CreatePost">Add Post</a>
@@ -23,17 +33,17 @@
                 <td>@item.Title</td>
                 <td>@item.Author.UserName</td>
                 <td>
-                    <a asp-controller="User" asp-action="ViewPost" asp-route-id="@item.Id">View</a> 
-                    @if( user_id == item.Author.Id)
+                    <a asp-controller="User" asp-action="ViewPost" asp-route-id="@item.Id">View</a>
+                    @if (user_id == item.Author.Id)
                     {
                         <span>| </span>
                         <a asp-controller="User" asp-action="UpdatePost" asp-route-id="@item.Id">Update</a>
                         <form asp-controller="User" asp-action="DeletePost" method="post">
-                        <input type="hidden" name="id" value="@item.Id" />
-                        <button class="link-dark" type="submit">Delete</button>
-                    </form>
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button class="link-dark" type="submit">Delete</button>
+                        </form>
                     }
-                    
+
 
                 </td>
             </tr>
@@ -41,3 +51,35 @@
     </tbody>
 </table>
 
+<div class="pager-container">
+    @if (pager.TotalPages > 0)
+    {
+        <ul class="pagination justify-content-end">
+            @if (pager.CurrentPage > 1)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-controller="User" asp-action="Home" asp-route-pg="1">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" asp-controller="User" asp-action="Home" asp-route-pg="@(pager.CurrentPage - 1)">Prev</a>
+                </li>
+            }
+            @for (var pge = pager.StartPage; pge <= pager.EndPage; pge++)
+            {
+                <li class="page-item @(pge == pager.CurrentPage? "active": "")">
+                    <a class="page-link" asp-controller="User" asp-action="Home" asp-route-pg="@pge">@pge</a>
+                </li>
+            }
+            @if (pager.CurrentPage < pager.TotalPages)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-controller="User" asp-action="Home" asp-route-pg="@(pager.CurrentPage + 1)">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" asp-controller="User" asp-action="Home" asp-route-pg="@(pager.TotalPages)">Last</a>
+                </li>
+            }
+
+        </ul>
+    }
+</div>
