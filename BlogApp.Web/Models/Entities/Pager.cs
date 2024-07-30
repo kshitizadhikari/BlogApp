@@ -28,15 +28,6 @@
                 startPage = 1;
             }
 
-            //if (endPage > 10)
-            //{
-            //    if(endPage > totalPages)
-            //    {
-            //        endPage = totalPages;
-            //    }
-            //    startPage = endPage - 9;
-            //}
-
             if (endPage > totalPages)
             {
                 endPage = totalPages;

@@ -54,7 +54,7 @@ namespace BlogApp.Web.Controllers
                 postsVM.Add(obj);
             }
             this.ViewBag.pager = pager;
-            return View("Home", postsVM);
+            return View(postsVM);
         }
 
         public async Task<IActionResult> CreatePost()
