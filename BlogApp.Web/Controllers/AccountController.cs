@@ -1,4 +1,5 @@
 ﻿using BlogApp.Web.Enums;
+using BlogApp.Web.Helpers;
 using BlogApp.Web.Infrastructure.Interfaces;
 using BlogApp.Web.Models;
 using BlogApp.Web.Models.Entities;
@@ -53,7 +54,7 @@ namespace BlogApp.Web.Controllers
                 return View(loginVM);
             }
 
-            SetUserSession(user);
+            SessionHelper.SetUserSession(user, HttpContext);
             await SignInUserAsync(user, loginVM.RememberMe);
             return RedirectToAction("Index", "Home");
         }
@@ -106,17 +107,17 @@ namespace BlogApp.Web.Controllers
             return RedirectToAction("Login");
         }
 
-        private void SetUserSession(AppUser user)
-        {
-            // Set session data
-            HttpContext.Session.SetString("user_id", user.Id);
-            HttpContext.Session.SetString("username", user.UserName);
-        }
+        //private void SetUserSession(AppUser user)
+        //{
+        //    // Set session data
+        //    HttpContext.Session.SetString("user_id", user.Id);
+        //    HttpContext.Session.SetString("username", user.UserName);
+        //}
 
-        private void ClearUserSession()
-        {
-            HttpContext.Session.Clear();
-        }
+        //private void ClearUserSession()
+        //{
+        //    HttpContext.Session.Clear();
+        //}
 
         private async Task SignInUserAsync(AppUser user, bool isPersistent)
         {
@@ -141,7 +142,7 @@ namespace BlogApp.Web.Controllers
         private async Task SignOutUserAsync()
         {
             await _signInManager.SignOutAsync();
-            ClearUserSession();
+            SessionHelper.ClearUserSession(HttpContext);
         }
 
     }
