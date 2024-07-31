@@ -2,6 +2,7 @@
 using BlogApp.Web.Infrastructure.Interfaces;
 using BlogApp.Web.Models;
 using BlogApp.Web.Models.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens.Configuration;
@@ -14,11 +15,15 @@ namespace BlogApp.Web.Controllers
 
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IRepositoryWrapper _repository;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
 
-        public UserController(IHttpContextAccessor httpContextAccessor, IRepositoryWrapper repositoryWrapper)
+        public UserController(IHttpContextAccessor httpContextAccessor, IRepositoryWrapper repositoryWrapper, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
             _httpContextAccessor = httpContextAccessor;
             _repository = repositoryWrapper;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public async Task<IActionResult> Home(int pg=1)
@@ -227,6 +232,38 @@ namespace BlogApp.Web.Controllers
                 PostCount = posts.Count,
             };
             return View(userProfile);
+        }
+
+        public async Task<IActionResult> UserSettings()
+        {
+            return View();
+        }
+
+        public async Task<IActionResult> ChangeUserPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangeUserPassword(ChangePasswordVM changePasswordVM)
+        {
+            if (!ModelState.IsValid) return View(changePasswordVM);
+            AppUser? curUser = await _repository.AppUser.GetById(HttpContext.Session.GetString("user_id"));
+            if (curUser == null) return RedirectToAction("Home");
+            if (!await _userManager.CheckPasswordAsync(curUser, changePasswordVM.CurrentPassword)) {
+                ModelState.AddModelError("CurrentPassword", "Password doesn't match current password");
+                return View(changePasswordVM);
+            }
+
+            var result = await _userManager.ChangePasswordAsync(curUser, changePasswordVM.CurrentPassword, changePasswordVM.ConfirmPassword);
+            if(!result.Succeeded)
+            {
+                ModelState.AddModelError("CurrentPassword", "Couldn't udpdate password. Try again later");
+                return View(changePasswordVM);
+            }
+            await _userManager.UpdateSecurityStampAsync(curUser);
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login", "Account");
         }
     }
 }
