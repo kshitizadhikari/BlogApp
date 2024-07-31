@@ -34,7 +34,7 @@ namespace BlogApp.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> CreatePost(PostVM obj)
         {
-            var curUserId = _httpContextAccessor.HttpContext.User.GetUserId();
+            var curUserId = HttpContext.User.GetUserId();
             if (!ModelState.IsValid) return View(obj);
 
             Post post = new Post
@@ -44,7 +44,7 @@ namespace BlogApp.Web.Controllers
                 AppUserId = curUserId
             };
 
-            _repository.Post.Create(post);
+            await _repository.Post.Create(post);
             await _repository.Save();
 
             return RedirectToAction("Home");
@@ -68,7 +68,7 @@ namespace BlogApp.Web.Controllers
 
         public async Task<IActionResult> AddComment(int postId, string comment)
         {
-            var userId = _httpContextAccessor.HttpContext.User.GetUserId();
+            var userId = HttpContext.User.GetUserId();
 
             Comment obj = new Comment
             {
@@ -214,7 +214,19 @@ namespace BlogApp.Web.Controllers
 
         public async Task<IActionResult> UserProfile()
         {
-            return View();
+            string user_id = HttpContext.Session.GetString("user_id");
+            AppUser? curUser = await _repository.AppUser.GetById(user_id);
+            List<Post> posts = await _repository.AppUser.GetUserPosts(user_id);
+            
+            UserProfile userProfile = new UserProfile
+            {
+                Id = user_id,
+                UserName = curUser.UserName,
+                Email = curUser.Email,
+                Posts = posts,
+                PostCount = posts.Count,
+            };
+            return View(userProfile);
         }
     }
 }
