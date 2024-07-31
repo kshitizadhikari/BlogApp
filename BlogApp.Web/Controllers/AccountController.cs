@@ -16,14 +16,15 @@ namespace BlogApp.Web.Controllers
         private readonly IRepositoryWrapper _repository;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IEmailService _emailService;
 
-        public AccountController(IRepositoryWrapper repository, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public AccountController(IRepositoryWrapper repository, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailService emailService)
         {
             _repository = repository;
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailService = emailService;
         }
-
 
         public IActionResult Login()
         {
@@ -95,6 +96,9 @@ namespace BlogApp.Web.Controllers
 
             await _userManager.AddToRoleAsync(user, Roles.User.ToString());
 
+            string subject = "Blog Register";
+            string message = $"You have been successfully registered as {user.UserName}";
+            await _emailService.SendEmailAsync(user.Email, subject, message);
             return RedirectToAction("Login");
         }
 
@@ -106,18 +110,6 @@ namespace BlogApp.Web.Controllers
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login");
         }
-
-        //private void SetUserSession(AppUser user)
-        //{
-        //    // Set session data
-        //    HttpContext.Session.SetString("user_id", user.Id);
-        //    HttpContext.Session.SetString("username", user.UserName);
-        //}
-
-        //private void ClearUserSession()
-        //{
-        //    HttpContext.Session.Clear();
-        //}
 
         private async Task SignInUserAsync(AppUser user, bool isPersistent)
         {
