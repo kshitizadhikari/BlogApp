@@ -4,6 +4,8 @@ using BlogApp.Web.Models;
 using BlogApp.Web.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens.Configuration;
+using System.Xml.Linq;
 
 namespace BlogApp.Web.Controllers
 {
@@ -50,24 +52,15 @@ namespace BlogApp.Web.Controllers
 
         public async Task<IActionResult> ViewPost(int id)
         {
-            Post? post = await _repository.Post.GetById(id);
-            AppUser? user = await _repository.AppUser.GetById(post.AppUserId);
-            List<Comment> comments = await _repository.Post.GetComments(id);
-
-            foreach ( var item in comments)
-            {
-                AppUser? commentor = await _repository.AppUser.GetById(item.AppUserId);
-                item.AppUser = commentor;
-            }
-
+            Post? post = await _repository.Post.GetPostById(id);
             ViewPostVM obj = new ViewPostVM
             {
                 Id = post.Id,
                 Title = post.Title,
                 Content = post.Content,
-                AuthorId = user.Id,
-                Author = user,
-                Comments = comments
+                AuthorId = post.AppUserId,
+                Author = post.AppUser,
+                Comments = post.Comments
             };
 
             return View(obj);
@@ -217,6 +210,11 @@ namespace BlogApp.Web.Controllers
             await _repository.Post.Delete(post);
             await _repository.Save();
             return RedirectToAction("Home");
+        }
+
+        public async Task<IActionResult> UserProfile()
+        {
+            return View();
         }
     }
 }
