@@ -45,6 +45,13 @@ builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
+
+
+//Configure Email Service 
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+builder.Services.AddTransient<IEmailService, EmailService>();
+
+//Configure Seed 
 builder.Services.AddTransient<Seed>();
 var app = builder.Build();
 
