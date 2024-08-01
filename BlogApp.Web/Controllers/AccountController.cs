@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
+using StackExchange.Redis;
 using System.Security.Claims;
 
 namespace BlogApp.Web.Controllers
@@ -42,6 +43,7 @@ namespace BlogApp.Web.Controllers
                 return View(loginVM);
             }
 
+            // Find the user by email
             AppUser? user = await _userManager.FindByEmailAsync(loginVM.Email);
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, loginVM.Password))
@@ -58,10 +60,10 @@ namespace BlogApp.Web.Controllers
                 return View(loginVM);
             }
 
-            //set session data
+            // Set session data
             SessionHelper.SetUserSession(user, HttpContext);
 
-            //set cookie data
+            // Set cookie data
             var cookieOptions = new CookieOptions
             {
                 Expires = DateTimeOffset.UtcNow.AddDays(7),
@@ -72,18 +74,31 @@ namespace BlogApp.Web.Controllers
             Response.Cookies.Append("user_id", user.Id, cookieOptions);
             Response.Cookies.Append("username", user.UserName, cookieOptions);
 
-            //set values in cache - redis
-            var cacheOptions = new DistributedCacheEntryOptions
+            try
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-            };
-            await _cache.SetStringAsync("user_id", user.Id.ToString(), cacheOptions);
-            await _cache.SetStringAsync("username", user.UserName.ToString(), cacheOptions);
+                // Set values in cache (Redis)
+                var cacheOptions = new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                };
+                await _cache.SetStringAsync("user_id", user.Id.ToString(), cacheOptions);
+                await _cache.SetStringAsync("username", user.UserName, cacheOptions);
+            }
+            catch (RedisConnectionException ex)
+            {
+                // Log or handle Redis connection issue, but allow login to proceed
+                Console.WriteLine($"Redis connection error: {ex.Message}");
+            }
 
-
+            // Sign in the user
             await SignInUserAsync(user, loginVM.RememberMe);
+
+            // Redirect after all operations
             return RedirectToAction("Index", "Home");
         }
+
+
+
 
         public IActionResult Register()
         {

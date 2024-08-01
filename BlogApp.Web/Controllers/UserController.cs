@@ -7,9 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Configuration;
-using System.Xml.Linq;
+using StackExchange.Redis;
 
 namespace BlogApp.Web.Controllers
 {
@@ -31,24 +29,50 @@ namespace BlogApp.Web.Controllers
             _cache = cache;
         }
 
-        public async Task<IActionResult> Home(int pg=1)
+        public async Task<IActionResult> Home(int pg = 1)
         {
-            // check cache first
-            var userId = await _cache.GetStringAsync("user_id");
-            var username = await _cache.GetStringAsync("username");
+            var userId = "";
+            var userName = "";
+
+            try
+            {
+                // Check cache first
+                userId = await _cache.GetStringAsync("user_id");
+                userName = await _cache.GetStringAsync("username");
+            }
+            catch (RedisConnectionException ex)
+            {
+                // Handle Redis connection issue or fallback
+                Console.WriteLine($"Redis connection error: {ex.Message}");
+                // Optionally log the error or handle it appropriately
+            }
 
             if (string.IsNullOrEmpty(userId))
             {
-
-                // check cookie
+                // Check cookies if no cache data
                 userId = Request.Cookies["user_id"] ?? "";
-                username = Request.Cookies["username"] ?? "";
+                userName = Request.Cookies["username"] ?? "";
 
-                // Optionally set the cache with the values from cookies
-                if (!string.IsNullOrEmpty(userId))
+                // Optionally set the cache with the values from cookies if Redis is available
+                try
                 {
-                    await _cache.SetStringAsync("user_id", userId);
-                    await _cache.SetStringAsync("username", username);
+                    if (!string.IsNullOrEmpty(userId))
+                    {
+                        await _cache.SetStringAsync("user_id", userId, new DistributedCacheEntryOptions
+                        {
+                            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) // Adjust as needed
+                        });
+                        await _cache.SetStringAsync("username", userName, new DistributedCacheEntryOptions
+                        {
+                            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) // Adjust as needed
+                        });
+                    }
+                }
+                catch (RedisConnectionException ex)
+                {
+                    // Handle Redis connection issue or fallback
+                    Console.WriteLine($"Redis connection error during cache update: {ex.Message}");
+                    // Optionally log the error or handle it appropriately
                 }
             }
 
@@ -57,11 +81,13 @@ namespace BlogApp.Web.Controllers
             {
                 return RedirectToAction("Login", "Account");
             }
-            SessionHelper.SetUserSession(userId, username, HttpContext);
+
+            // Set user session
+            SessionHelper.SetUserSession(userId, userName, HttpContext);
 
             return View();
-
         }
+
 
         public async Task<IActionResult> CreatePost()
         {
