@@ -1,10 +1,13 @@
 ﻿using BlogApp.Web.Extensions;
+using BlogApp.Web.Helpers;
 using BlogApp.Web.Infrastructure.Interfaces;
 using BlogApp.Web.Models;
 using BlogApp.Web.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Configuration;
 using System.Xml.Linq;
 
@@ -17,18 +20,27 @@ namespace BlogApp.Web.Controllers
         private readonly IRepositoryWrapper _repository;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IDistributedCache _cache;
 
-        public UserController(IHttpContextAccessor httpContextAccessor, IRepositoryWrapper repositoryWrapper, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public UserController(IHttpContextAccessor httpContextAccessor, IRepositoryWrapper repositoryWrapper, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IDistributedCache cache)
         {
             _httpContextAccessor = httpContextAccessor;
             _repository = repositoryWrapper;
             _userManager = userManager;
             _signInManager = signInManager;
+            _cache = cache;
         }
 
         public async Task<IActionResult> Home(int pg=1)
         {
-            return View();
+            if(!string.IsNullOrEmpty(await _cache.GetStringAsync("user_id")))
+            {
+                var user_id = await _cache.GetStringAsync("user_id");
+                var username = await _cache.GetStringAsync("username");
+                SessionHelper.SetUserSession(user_id, username, HttpContext);
+            }
+                return View();
+
         }
 
         public async Task<IActionResult> CreatePost()

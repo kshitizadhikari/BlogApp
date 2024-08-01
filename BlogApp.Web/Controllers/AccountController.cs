@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using System.Security.Claims;
 
 namespace BlogApp.Web.Controllers
@@ -17,13 +18,15 @@ namespace BlogApp.Web.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IEmailService _emailService;
+        private readonly IDistributedCache _cache;
 
-        public AccountController(IRepositoryWrapper repository, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailService emailService)
+        public AccountController(IRepositoryWrapper repository, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailService emailService, IDistributedCache cache)
         {
             _repository = repository;
             _userManager = userManager;
             _signInManager = signInManager;
             _emailService = emailService;
+            _cache = cache;
         }
 
         public IActionResult Login()
@@ -55,7 +58,13 @@ namespace BlogApp.Web.Controllers
                 return View(loginVM);
             }
 
+            var cacheOptions = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            };
             SessionHelper.SetUserSession(user, HttpContext);
+            await _cache.SetStringAsync("user_id", user.Id.ToString(), cacheOptions);
+            await _cache.SetStringAsync("username", user.UserName.ToString(), cacheOptions);
             await SignInUserAsync(user, loginVM.RememberMe);
             return RedirectToAction("Index", "Home");
         }
