@@ -37,7 +37,11 @@ namespace BlogApp.Web.Controllers
             {
                 var user_id = await _cache.GetStringAsync("user_id");
                 var username = await _cache.GetStringAsync("username");
-                SessionHelper.SetUserSession(user_id, username, HttpContext);
+                
+                if(HttpContext.Session.GetString("user_id") == null)
+                {
+                    SessionHelper.SetUserSession(user_id, username, HttpContext);
+                }
             }
                 return View();
 

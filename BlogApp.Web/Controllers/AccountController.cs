@@ -63,8 +63,11 @@ namespace BlogApp.Web.Controllers
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
             };
             SessionHelper.SetUserSession(user, HttpContext);
+
+            //set values in cache - redis
             await _cache.SetStringAsync("user_id", user.Id.ToString(), cacheOptions);
             await _cache.SetStringAsync("username", user.UserName.ToString(), cacheOptions);
+
             await SignInUserAsync(user, loginVM.RememberMe);
             return RedirectToAction("Index", "Home");
         }
