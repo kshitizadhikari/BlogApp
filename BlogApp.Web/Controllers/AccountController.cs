@@ -58,15 +58,28 @@ namespace BlogApp.Web.Controllers
                 return View(loginVM);
             }
 
+            //set session data
+            SessionHelper.SetUserSession(user, HttpContext);
+
+            //set cookie data
+            var cookieOptions = new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddDays(7),
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict
+            };
+            Response.Cookies.Append("user_id", user.Id, cookieOptions);
+            Response.Cookies.Append("username", user.UserName, cookieOptions);
+
+            //set values in cache - redis
             var cacheOptions = new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
             };
-            SessionHelper.SetUserSession(user, HttpContext);
-
-            //set values in cache - redis
             await _cache.SetStringAsync("user_id", user.Id.ToString(), cacheOptions);
             await _cache.SetStringAsync("username", user.UserName.ToString(), cacheOptions);
+
 
             await SignInUserAsync(user, loginVM.RememberMe);
             return RedirectToAction("Index", "Home");

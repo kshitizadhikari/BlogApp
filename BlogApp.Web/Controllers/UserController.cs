@@ -33,17 +33,33 @@ namespace BlogApp.Web.Controllers
 
         public async Task<IActionResult> Home(int pg=1)
         {
-            if(!string.IsNullOrEmpty(await _cache.GetStringAsync("user_id")))
+            // check cache first
+            var userId = await _cache.GetStringAsync("user_id");
+            var username = await _cache.GetStringAsync("username");
+
+            if (string.IsNullOrEmpty(userId))
             {
-                var user_id = await _cache.GetStringAsync("user_id");
-                var username = await _cache.GetStringAsync("username");
-                
-                if(HttpContext.Session.GetString("user_id") == null)
+
+                // check cookie
+                userId = Request.Cookies["user_id"] ?? "";
+                username = Request.Cookies["username"] ?? "";
+
+                // Optionally set the cache with the values from cookies
+                if (!string.IsNullOrEmpty(userId))
                 {
-                    SessionHelper.SetUserSession(user_id, username, HttpContext);
+                    await _cache.SetStringAsync("user_id", userId);
+                    await _cache.SetStringAsync("username", username);
                 }
             }
-                return View();
+
+            // If no user ID found, redirect to login
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            SessionHelper.SetUserSession(userId, username, HttpContext);
+
+            return View();
 
         }
 
