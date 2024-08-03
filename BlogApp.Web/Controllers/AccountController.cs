@@ -52,6 +52,7 @@ namespace BlogApp.Web.Controllers
                 return View(loginVM);
             }
 
+            // Sign in the user with the specified RememberMe option
             var result = await _signInManager.PasswordSignInAsync(user, loginVM.Password, loginVM.RememberMe, lockoutOnFailure: false);
 
             if (!result.Succeeded)
@@ -63,42 +64,51 @@ namespace BlogApp.Web.Controllers
             // Set session data
             SessionHelper.SetUserSession(user, HttpContext);
 
-            // Set cookie data
-            var cookieOptions = new CookieOptions
+            // Handle RememberMe logic
+            if (loginVM.RememberMe)
             {
-                Expires = DateTimeOffset.UtcNow.AddDays(7),
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict
-            };
-            Response.Cookies.Append("user_id", user.Id, cookieOptions);
-            Response.Cookies.Append("username", user.UserName, cookieOptions);
-
-            try
-            {
-                // Set values in cache (Redis)
-                var cacheOptions = new DistributedCacheEntryOptions
+                // Set cookie options
+                var cookieOptions = new CookieOptions
                 {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                    Expires = DateTimeOffset.UtcNow.AddDays(7),
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict
                 };
-                await _cache.SetStringAsync("user_id", user.Id.ToString(), cacheOptions);
-                await _cache.SetStringAsync("username", user.UserName, cacheOptions);
+                // Set cookies
+                Response.Cookies.Append("user_id", user.Id.ToString(), cookieOptions);
+                Response.Cookies.Append("username", user.UserName, cookieOptions);
+
+                // Set values in cache (Redis)
+                try
+                {
+                    var cacheOptions = new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                    };
+                    await _cache.SetStringAsync("user_id", user.Id.ToString(), cacheOptions);
+                    await _cache.SetStringAsync("username", user.UserName, cacheOptions);
+                }
+                catch (RedisConnectionException ex)
+                {
+                    // Log or handle Redis connection issue
+                    Console.WriteLine($"Redis connection error: {ex.Message}");
+                }
             }
-            catch (RedisConnectionException ex)
+            else
             {
-                // Log or handle Redis connection issue, but allow login to proceed
-                Console.WriteLine($"Redis connection error: {ex.Message}");
+                // Remove cookies
+                Response.Cookies.Delete("user_id");
+                Response.Cookies.Delete("username");
+
+                // Remove values from cache
+                await _cache.RemoveAsync("user_id");
+                await _cache.RemoveAsync("username");
             }
 
-            // Sign in the user
-            await SignInUserAsync(user, loginVM.RememberMe);
-
-            // Redirect after all operations
+            // Redirect to the home page
             return RedirectToAction("Index", "Home");
         }
-
-
-
 
         public IActionResult Register()
         {

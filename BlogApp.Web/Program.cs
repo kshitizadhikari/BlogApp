@@ -55,7 +55,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(20); // Adjusted to a more reasonable timeout
+    options.IdleTimeout = TimeSpan.FromSeconds(30); // Adjusted to a more reasonable timeout
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
@@ -65,7 +65,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         options.LoginPath = "/Account/Login"; // Path to the login action
         options.AccessDeniedPath = "/Account/Login"; // Path for access denied
-        options.ExpireTimeSpan = TimeSpan.FromDays(30); // Set cookie expiration to 30 days
+        options.ExpireTimeSpan = TimeSpan.FromDays(7); // Set cookie expiration to 30 days
         options.SlidingExpiration = true; // Enable sliding expiration
         options.Cookie.HttpOnly = true; // Protect the cookie from client-side scripts
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Require HTTPS for the cookie
